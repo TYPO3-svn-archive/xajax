@@ -3,7 +3,7 @@
 ########################################################################
 # Extension Manager/Repository config file for ext: "xajax"
 #
-# Auto generated 05-04-2006 11:00
+# Auto generated 09-07-2006 12:37
 #
 # Manual updates:
 # Only the data in the array - anything else is removed by next write.
@@ -12,10 +12,10 @@
 
 $EM_CONF[$_EXTKEY] = array(
 	'title' => 'xaJax',
-	'description' => 'The xajax 0.2.3 library (stable). xajax is a PHP class library that allows you to easily create powerful, web-based, Ajax applications using HTML, CSS, JavaScript, and PHP.',
+	'description' => 'The xajax 0.2.4 library (stable). xajax is a PHP class library that allows you to easily create powerful, web-based, Ajax applications using HTML, CSS, JavaScript, and PHP.',
 	'category' => 'misc',
 	'shy' => 0,
-	'version' => '0.2.3',
+	'version' => '0.2.4',
 	'dependencies' => '',
 	'conflicts' => '',
 	'priority' => '',
@@ -40,7 +40,9 @@ $EM_CONF[$_EXTKEY] = array(
 		'suggests' => array(
 		),
 	),
-	'_md5_values_when_last_written' => 'a:11:{s:9:"ChangeLog";s:4:"c4d9";s:11:"LICENSE.txt";s:4:"0cce";s:10:"README.txt";s:4:"e103";s:18:"class.tx_xajax.php";s:4:"2c19";s:27:"class.tx_xajax_response.php";s:4:"5c8a";s:15:"ext_emconf.php~";s:4:"041d";s:12:"ext_icon.gif";s:4:"3ec5";s:8:"icon.gif";s:4:"4aa7";s:17:"xajaxCompress.php";s:4:"8664";s:17:"xajax_js/xajax.js";s:4:"e1a7";s:30:"xajax_js/xajax_uncompressed.js";s:4:"17d2";}',
+	'_md5_values_when_last_written' => 'a:10:{s:9:"ChangeLog";s:4:"1bfc";s:11:"LICENSE.txt";s:4:"0cce";s:10:"README.txt";s:4:"c43a";s:18:"class.tx_xajax.php";s:4:"11bf";s:27:"class.tx_xajax_response.php";s:4:"9fbd";s:12:"ext_icon.gif";s:4:"3ec5";s:8:"icon.gif";s:4:"4aa7";s:17:"xajaxCompress.php";s:4:"9399";s:17:"xajax_js/xajax.js";s:4:"ac78";s:30:"xajax_js/xajax_uncompressed.js";s:4:"6f80";}',
+	'suggests' => array(
+	),
 );
 
 ?>

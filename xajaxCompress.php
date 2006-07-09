@@ -1,30 +1,45 @@
 <?php
-/***************************************************************
- *  Copyright notice upon implementation of xajax as TYPO3 extension
+/**
+ * xajaxCompress.php :: function to compress Javascript
  *
- *  (c) 2006 Elmar Hinz (elmar.hinz@team-red.net)
- *  All rights reserved
+ * xajax version 0.2.4
+ * copyright (c) 2005 by Jared White & J. Max Wilson
+ * http://www.xajaxproject.org
  *
- *  This script is part of the TYPO3 project. The TYPO3 project is
- *  free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ * xajax is an open source PHP class library for easily creating powerful
+ * PHP-driven, web-based Ajax Applications. Using xajax, you can asynchronously
+ * call PHP functions and update the content of your your webpage without
+ * reloading the page.
  *
- *  The GNU General Public License can be found at
- *  http://www.gnu.org/copyleft/gpl.html.
+ * xajax is released under the terms of the LGPL license
+ * http://www.gnu.org/copyleft/lesser.html#SEC3
  *
- *  This script is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
- *  This copyright notice MUST APPEAR in all copies of the script!
- ***************************************************************/
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * 
+ * @package xajax
+ * @version $Id$
+ * @copyright Copyright (c) 2005-2006  by Jared White & J. Max Wilson
+ * @license http://www.gnu.org/copyleft/lesser.html#SEC3 LGPL License
+ */
 
-// xajaxCompressJavascript() compresses the javascript code for more efficient delivery
-// used internally 
-// $sJS is a string containing the javascript code to compress
+/**
+ * Compresses the Javascript code for more efficient delivery.
+ * (used internally)
+ * 
+ * @param string contains the Javascript code to compress
+ */
 function xajaxCompressJavascript($sJS)
 {
 	//remove windows cariage returns

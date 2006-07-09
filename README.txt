@@ -1,5 +1,5 @@
 ==============================================================================
-TYPO3 extension based on the  PHP Class Library Version 0.2.3 (stable release)
+TYPO3 extension based on the  PHP Class Library Version 0.2.4 (stable release)
 ==============================================================================
 
  ------------------------------------------------------
@@ -27,19 +27,15 @@ and read the TYPO3 .sxw document file as soon as it is available.
 
 
 ====================================================================
-This is the README of the original xajax PHP Class Library:
-====================================================================
-
-====================================================================
  xajax PHP Class Library
  The easiest way to develop asynchronous Ajax applications with PHP
 
- Version 0.2.3 (stable release)
+ Version 0.2.4 (stable release)
  README Text File
 
  ------------------------------------------------------
  | Release Notes:                                     |
- | http://wiki.xajaxproject.org/0.2.3_Release_Notes   |
+ | http://wiki.xajaxproject.org/0.2.4_Release_Notes   |
  |                                                    |
  | Lead Developers:                                   |
  | Jared White (jared@intuitivefuture.com)            |
@@ -48,7 +44,7 @@ This is the README of the original xajax PHP Class Library:
  ------------------------------------------------------
 ====================================================================
 
- :: To find out what's changed since the 0.2.2 release of xajax, ::
+ :: To find out what's changed since the 0.2.3 release of xajax, ::
  :: view the Release Notes in the link above.                    ::
 
 1. Introduction
@@ -103,8 +99,11 @@ site folder. Or if you wish, you can put all of the files in a
 dedicated "xajax" folder on your Web server (make sure that you
 know what that URL is relative your site pages so you can provide
 xajax with the correct installed folder URL). Note that the
+
 "thewall" folder in the "examples" folder needs to be writable by
+
 the Web server for that example to function.
+
 Within the main xajax folder there are two folders: "examples"
 and "tests". You should be able to view these PHP pages from your
 Web browser and see xajax working in action. If you can view the
