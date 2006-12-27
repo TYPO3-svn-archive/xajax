@@ -760,6 +760,7 @@ class tx_xajax
 	function getJavascriptConfig()
 	{
 		$html  = "\t<script type=\"text/javascript\">\n";
+		$html .= "/*<![CDATA[*/\n";
 		$html .= "var xajaxRequestUri=\"".$this->sRequestURI."\";\n";
 		$html .= "var xajaxDebug=".($this->bDebug?"true":"false").";\n";
 		$html .= "var xajaxStatusMessages=".($this->bStatusMessages?"true":"false").";\n";
@@ -772,6 +773,7 @@ class tx_xajax
 			$html .= $this->_wrap($sFunction,$this->aFunctionRequestTypes[$sFunction]);
 		}
 
+		$html .="/*]]>*/\n";
 		$html .= "\t</script>\n";
 		return $html;		
 	}
