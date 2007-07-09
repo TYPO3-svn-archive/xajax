@@ -1,0 +1,21 @@
+(add new changes on top of this file)
+
+07-06-15 Ricardo Mieres  <ricardo.mieres@502.cl>
+
+    Para  poder generar multiples objetos XMLHTTPRequest y compatibilizar con typo3
+    
+    	se modificó:
+    			  "class.tx_xajax_xajax.php" 
+    			  "xajac_source.js"  
+    			  este archivo es procesado por la función getTempJavascript linea 819 de class.tx_xajax_xajax.php
+    			  aqui se genera un archivo javasript para cada objeto XMLHTTPRequest que se desea utilizar.
+    Conflicto con páginas no_chache=0
+    		
+    		se modificó el el metodo _detectUri en linea 875 para evitar el problema presente en la pagina almacenadas en cache.
+    		
+    		
+    Aun se mantiene la compatibilidad con la version anterior.  la classe tx_xajax es extendida de tx_xajax_xajax.
+    
+    
+
+	* Initial release
