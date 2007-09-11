@@ -2,7 +2,7 @@
 /***************************************************************
  *  Copyright notice for implementation of xajax as TYPO3 extension
  *
- *  (c) 2006 Elmar Hinz (elmar.hinz@team-red.net)
+ *  (c) 2007 Elmar Hinz (elmar.hinz@team-red.net)
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -144,6 +144,10 @@ class tx_xajax
 	 * @var integer Position in $aObjArray
 	 */
 	var $iPos;
+	/**
+	 * @var integer The number of milliseconds to wait before checking if xajax is loaded in the client, or 0 to disable (default 6000)
+	 */
+	var $iTimeout;
 	
 	/**#@-*/
 	
@@ -175,6 +179,96 @@ class tx_xajax
 		$this->setCharEncoding($sEncoding);
 		$this->bDecodeUTF8Input = false;
 		$this->bOutputEntities = false;
+		$this->iTimeout = 6000;
+	}
+	
+	/**
+	 * Returns the current xajax version.
+ 	 *
+ 	 * @return string
+	 */
+	function getVersion()
+	{
+		return 'xajax 0.2.5';
+	}
+
+	/**
+	 * Sets multiple flags based on the supplied associative array (see
+	 * {@link xajax::setFlag()} for flag names)
+	 *
+	 * @param array
+	 */
+	function setFlags($flags)
+	{
+		foreach ($flags as $name => $value) {
+			$this->setFlag($name, $value);
+		}
+	}
+	
+	/**
+	 * Sets a flag (boolean true or false). Available flags with their defaults
+	 * are as follows:
+	 *
+	 * <ul>
+	 * <li>debug: false</li>
+	 * <li>statusMessages: false</li>
+	 * <li>waitCursor: true</li>
+	 * <li>exitAllowed: true</li>
+	 * <li>errorHandler: false</li>
+	 * <li>cleanBuffer: false</li>
+	 * <li>decodeUTF8Input: false</li>
+	 * <li>outputEntities: false</li>
+	 * </ul>
+	 *
+	 * @param string name of flag
+	 * @param boolean
+	 */
+	function setFlag($name, $value)
+	{
+		$sVar = 'b' . ucfirst($name);
+		if (array_key_exists($sVar, get_object_vars($this))) {
+			$this->$sVar = (boolean)$value;
+		}
+		else {
+			trigger_error("The flag \"$name\" could not be found", E_USER_ERROR);
+		}
+	}
+	
+	/**
+	 * Returns the value of the flag
+	 *
+	 * @return boolean
+	 */
+	function getFlag($name)
+	{
+		$sVar = 'b' . ucfirst($name);
+		if (array_key_exists($sVar, get_object_vars($this))) {
+			return $this->$sVar;
+		}
+		else {
+			return NULL;
+		}
+	}
+		
+	/**
+	 * Sets the timeout before xajax notifies the client that xajax has not been loaded
+	 * <i>Usage:</i> <kbd>$xajax->setTimeout(6000);</kbd>
+	 *
+	 * @param integer the number of milliseconds, or 0 to disable
+	 */
+	function setTimeout($iTimeout)
+	{
+		$this->iTimeout = $iTimeout;
+	}
+	
+	/**
+	 * Returns the xajax Javascript timeout
+	 *
+	 * @return integer the number of milliseconds (or 0 if disabled)
+	 */
+	function getTimeout()
+	{
+		return $this->iTimeout;
 	}
 		
 	/**
@@ -384,6 +478,10 @@ class tx_xajax
 	 */
 	function registerFunction($mFunction,$sRequestType=XAJAX_POST)
 	{
+		if (is_string($sRequestType)) {
+			return $this->registerExternalFunction($mFunction, $sRequestType);
+		}
+	
 		if (is_array($mFunction)) {
 			$this->aFunctions[$mFunction[0]] = 1;
 			$this->aFunctionRequestTypes[$mFunction[0]] = $sRequestType;
@@ -502,6 +600,11 @@ class tx_xajax
 		return -1;
 	}
 	
+	function processRequest()
+	{
+		return $this->processRequests();
+	}
+	
 	/**
 	 * This is the main communications engine of xajax. The engine handles all
 	 * incoming xajax requests, calls the apporiate PHP functions (or
@@ -521,7 +624,6 @@ class tx_xajax
 		$aArgs = array();
 		$sPreResponse = "";
 		$bEndRequest = false;
-		$sResponse = "";
 		
 		$requestMode = $this->getRequestMode();
 		if ($requestMode == -1) return;
@@ -555,9 +657,8 @@ class tx_xajax
 		if ($this->sPreFunction) {
 			if (!$this->_isFunctionCallable($this->sPreFunction)) {
 				$bFoundFunction = false;
-				$objResponse = new tx_xajax_response();
-				$objResponse->addAlert("Unknown Pre-Function ". $this->sPreFunction);
-				$sResponse = $objResponse->getXML();
+				$oResponse = new tx_xajax_response();
+				$oResponse->addAlert("Unknown Pre-Function ". $this->sPreFunction);
 			}
 		}
 		//include any external dependencies associated with this function name
@@ -578,17 +679,9 @@ class tx_xajax
 				}
 				else {
 					$bFoundFunction = false;
-					$objResponse = new tx_xajax_response();
-					$objResponse->addAlert("Unknown Function $sFunctionName.");
-					$sResponse = $objResponse->getXML();
+					$oResponse = new tx_xajax_response();
+					$oResponse->addAlert("Unknown Function $sFunctionName.");
 				}
-			}
-			else if ($this->aFunctionRequestTypes[$sFunctionName] != $requestMode)
-			{
-				$bFoundFunction = false;
-				$objResponse = new tx_xajax_response();
-				$objResponse->addAlert("Incorrect Request Type.");
-				$sResponse = $objResponse->getXML();
 			}
 		}
 		
@@ -624,37 +717,29 @@ class tx_xajax
 				else {
 					$sPreResponse = $mPreResponse;
 				}
-				if (is_a($sPreResponse, "tx_xajax_response")) {
-					$sPreResponse = $sPreResponse->getXML();
-				}
-				if ($bEndRequest) $sResponse = $sPreResponse;
+				if ($bEndRequest) $oResponse = $sPreResponse;
 			}
 			
 			if (!$bEndRequest) {
 				if (!$this->_isFunctionCallable($sFunctionName)) {
-					$objResponse = new tx_xajax_response();
-					$objResponse->addAlert("The Registered Function $sFunctionName Could Not Be Found.");
-					$sResponse = $objResponse->getXML();
+					$oResponse = new tx_xajax_response();
+					$oResponse->addAlert("The Registered Function $sFunctionName Could Not Be Found.");
 				}
 				else {
 					if ($bFunctionIsCatchAll) {
 						$aArgs = array($sFunctionNameForSpecial, $aArgs);
 					}
-					$sResponse = $this->_callFunction($sFunctionName, $aArgs);
+					$oResponse = $this->_callFunction($sFunctionName, $aArgs);
 				}
-				if (is_a($sResponse, "tx_xajax_response")) {
-					$sResponse = $sResponse->getXML();
-				}
-				if (!is_string($sResponse) || strpos($sResponse, "<xjx>") === FALSE) {
-					$objResponse = new tx_xajax_response();
-					$objResponse->addAlert("No XML Response Was Returned By Function $sFunctionName.");
-					$sResponse = $objResponse->getXML();
+				if (is_string($sResponse)) {
+					$oResponse = new tx_xajax_response();
+					$oResponse->addAlert("No XML Response Was Returned By Function $sFunctionName.\n\nOutput: ".$oResponse);
 				}
 				else if ($sPreResponse != "") {
-					$sNewResponse = new tx_xajax_response($this->sEncoding, $this->bOutputEntities);
-					$sNewResponse->loadXML($sPreResponse);
-					$sNewResponse->loadXML($sResponse);
-					$sResponse = $sNewResponse->getXML();
+					$oNewResponse = new tx_xajax_response($this->sEncoding, $this->bOutputEntities);
+					$oNewResponse->loadXML($sPreResponse);
+					$oNewResponse->loadXML($oResponse);
+					$oResponse = $sNewResponse;
 				}
 			}
 		}
@@ -664,12 +749,12 @@ class tx_xajax
 			$sContentHeader .= " charset=".$this->sEncoding;
 		header($sContentHeader);
 		if ($this->bErrorHandler && !empty( $GLOBALS['xajaxErrorHandlerText'] )) {
-			$sErrorResponse = new tx_xajax_response();
-			$sErrorResponse->addAlert("** PHP Error Messages: **" . $GLOBALS['xajaxErrorHandlerText']);
+			$oErrorResponse = new tx_xajax_response();
+			$oErrorResponse->addAlert("** PHP Error Messages: **" . $GLOBALS['xajaxErrorHandlerText']);
 			if ($this->sLogFile) {
 				$fH = @fopen($this->sLogFile, "a");
 				if (!$fH) {
-					$sErrorResponse->addAlert("** Logging Error **\n\nxajax was unable to write to the error log file:\n" . $this->sLogFile);
+					$oErrorResponse->addAlert("** Logging Error **\n\nxajax was unable to write to the error log file:\n" . $this->sLogFile);
 				}
 				else {
 					fwrite($fH, "** xajax Error Log - " . strftime("%b %e %Y %I:%M:%S %p") . " **" . $GLOBALS['xajaxErrorHandlerText'] . "\n\n\n");
@@ -677,12 +762,12 @@ class tx_xajax
 				}
 			}
 
-			$sErrorResponse->loadXML($sResponse);
-			$sResponse = $sErrorResponse->getXML();
+			$oErrorResponse->loadXML($oResponse);
+			$oResponse = $oErrorResponse;
 			
 		}
 		if ($this->bCleanBuffer) while (@ob_end_clean());
-		print $sResponse;
+		print $oResponse->getOutput();
 		if ($this->bErrorHandler) restore_error_handler();
 		
 		if ($this->bExitAllowed)
@@ -801,10 +886,13 @@ class tx_xajax
 			
 		if ($sJsURI != "" && substr($sJsURI, -1) != "/") $sJsURI .= "/";
 		
-		$html = "\t<script type=\"text/javascript\" src=\"" . $sJsURI . $sJsFile . "\"></script>\n";	
-		$html .= "\t<script type=\"text/javascript\">\n";
-		$html .= "window.setTimeout(function () { if (!xajaxLoaded) { alert('Error: the xajax Javascript file could not be included. Perhaps the URL is incorrect?\\nURL: {$sJsURI}{$sJsFile}'); } }, 6000);\n";
-		$html .= "\t</script>\n";
+		$html = "\t<script type=\"text/javascript\" src=\"" . $sJsURI . $sJsFile . "\"></script>\n";
+		if ($this->iTimeout != 0)
+		{
+			$html .= "\t<script type=\"text/javascript\">\n";
+			$html .= "window.setTimeout(function () { if (!xajaxLoaded) { alert('Error: the xajax Javascript file could not be included. Perhaps the URL is incorrect?\\nURL: {$sJsURI}{$sJsFile}'); } }, ".$this->iTimeout.");\n";
+			$html .= "\t</script>\n";
+		}
 		return $html;
 	}
 
@@ -859,6 +947,7 @@ class tx_xajax
 
 		// Try to get the request URL
 		if (!empty($_SERVER['REQUEST_URI'])) {
+			$_SERVER['REQUEST_URI'] = str_replace(array('"',"'",'<','>'), array('%22','%27','%3C','%3E'), $_SERVER['REQUEST_URI']);
 			$aURL = parse_url($_SERVER['REQUEST_URI']);
 		}
 
@@ -872,7 +961,13 @@ class tx_xajax
 		}
 
 		if (empty($aURL['host'])) {
-			if (!empty($_SERVER['HTTP_HOST'])) {
+			if (!empty($_SERVER['HTTP_X_FORWARDED_HOST'])) {
+				if (strpos($_SERVER['HTTP_X_FORWARDED_HOST'], ':') > 0) {
+					list($aURL['host'], $aURL['port']) = explode(':', $_SERVER['HTTP_X_FORWARDED_HOST']);
+				} else {
+					$aURL['host'] = $_SERVER['HTTP_X_FORWARDED_HOST'];
+				}
+			} else if (!empty($_SERVER['HTTP_HOST'])) {
 				if (strpos($_SERVER['HTTP_HOST'], ':') > 0) {
 					list($aURL['host'], $aURL['port']) = explode(':', $_SERVER['HTTP_HOST']);
 				} else {
@@ -897,7 +992,7 @@ class tx_xajax
 			} else {
 				$sPath = parse_url($_SERVER['PHP_SELF']);
 			}
-			$aURL['path'] = $sPath['path'];
+			$aURL['path'] = str_replace(array('"',"'",'<','>'), array('%22','%27','%3C','%3E'), $sPath['path']);
 			unset($sPath);
 		}
 
